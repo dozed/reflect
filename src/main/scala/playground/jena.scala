@@ -79,24 +79,20 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
     } else d
   }
 
-}
-
-object Rdf extends App {
-
-  def validate[T](p: ValueProvider[T], s: Frame, schemas: String => Option[Frame]): Boolean = {
+  // validation
+  // - check if all required attributes are there
+  // - validate nested frames
+  // - wrong cardinality -> None
+  // - literal type not compatible -> None
+  def validate: Boolean = {
     def attributeTypeIsOk(a: Attribute): Boolean = {
-
-      // check if all required attributes are there
-      // and validate nested frames
-      // wrong cardinality -> None
-      // literal type not compatible -> None
-      p.get(a.uri) match {
+      get(a.uri) match {
         case Some(v: SchemaBasedRdfReader) =>
-          schemas(a.typesig).map(s => validate(v, s, schemas)).getOrElse(false)
+          schemaSource(a.typesig).map(s => v.validate).getOrElse(false)
         case Some(v: List[_]) if !v.isEmpty =>
           v(0) match {
             case x: SchemaBasedRdfReader =>
-              schemas(a.typesig).map(s => v.asInstanceOf[List[ValueProvider[_]]].forall(x => validate(x, s, schemas))).getOrElse(false)
+              schemaSource(a.typesig).map(s => v.asInstanceOf[List[SchemaBasedRdfReader]].forall(_.validate)).getOrElse(false)
             case _ => true
           }
         case Some(v) => true
@@ -104,8 +100,11 @@ object Rdf extends App {
       }
     }
 
-    s.attributes.forall(attributeTypeIsOk)
+    schema.attributes.forall(attributeTypeIsOk)
   }
+}
+
+object Rdf extends App {
 
   def debug[T](reader: ValueProvider[T]) = reader.keySet map (k => k -> reader.get(k)) foreach println
 
@@ -140,7 +139,7 @@ object Rdf extends App {
     }
   }
 
-  println(validate(reader, schema, schemas.get _))
+  println(reader.validate)
   print(reader.targetValues)
 
 /*
