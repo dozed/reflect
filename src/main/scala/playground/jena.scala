@@ -106,22 +106,22 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
   }
 }
 
+object Uris {
+  val dcDescription = "http://purl.org/dc/terms/description"
+  val rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+  val rdfsLabel = "http://www.w3.org/2000/01/rdf-schema#label"
+  val qudtUnit = "http://data.nasa.gov/qudt/owl/qudt#unit"
+  val qudtNumericalValue = "http://data.nasa.gov/qudt/owl/qudt#numericalValue"
+  val smwPage = "http://semantic-mediawiki.org/swivt/1.0#page"
+  val recipeHasIngredientLine = "http://food.42dots.com/hasIngredientLine"
+  val recipeIngredient = "http://food.42dots.com/ingredient"
+  val recipeCanBeEatenAs = "http://food.42dots.com/canBeEatenAs"
+  val recipe = "http://food.42dots.com/Recipe"
+}
+
 object Rdf extends App {
 
   def debug[T](reader: ValueProvider[T]) = reader.keySet map (k => k -> reader.get(k)) foreach println
-
-  val source = io.Source.fromInputStream(getClass.getResourceAsStream("/recipes.fl"))
-  val txt = source.mkString
-  source.close
-
-  val schemas = FLogicParser(txt).map(f => f.uri -> f).toMap
-  val schema = schemas("http://food.42dots.com/Recipe")
-
-  val rdfModel = ModelFactory.createDefaultModel()
-  rdfModel.read(getClass.getResourceAsStream("/recipe-1.xml"), null)
-  val res = rdfModel.getResource("http://food.42dots.com/dataset/taaable/Test-Recipe-1")
-
-  val reader = new SchemaBasedRdfReader(res, rdfModel, schema, schemas.get _)
 
   def print(values: Map[String, Any], prefix: String = "") {
     def printValue(a: Any) {
@@ -141,8 +141,21 @@ object Rdf extends App {
     }
   }
 
-  println(reader.validate)
-  print(reader.targetValues)
+  val source = io.Source.fromInputStream(getClass.getResourceAsStream("/recipes.fl"))
+  val txt = source.mkString
+  source.close
+
+  val schemas = FLogicParser(txt).map(f => f.uri -> f).toMap
+  val schema = schemas(Uris.recipe)
+
+  val rdfModel = ModelFactory.createDefaultModel()
+  rdfModel.read(getClass.getResourceAsStream("/recipes.xml"), null)
+
+  val recipes = rdfModel.listStatements(null, rdfModel.getProperty(Uris.rdfType), rdfModel.getResource(Uris.recipe)).map(_.getSubject)
+  recipes.filterNot { res =>
+    val reader = new SchemaBasedRdfReader(res, rdfModel, schema, schemas.get _)
+    reader.validate
+  } foreach println
 
 /*
 
