@@ -47,13 +47,6 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
 
   protected lazy val sourceValues: Map[Property, List[RDFNode]] = data.listProperties.toList.toList.groupBy(_.getPredicate).mapValues(_.map(_.getObject))
 
-  lazy val targetValues: Map[String, Any] = schema.attributes.map(_.uri).flatMap { k =>
-    read(k) match {
-      case Right(v) => Some(k -> v)
-      case _ => None
-    }
-  }.toMap
-
   def keySet: Set[String] = sourceValues.keys.map(_.getURI).toSet
 
   // not that easy operation with rdf since we cant modify the source, maybe add a filter
@@ -123,21 +116,24 @@ object Rdf extends App {
 
   def debug[T](reader: ValueProvider[T]) = reader.keySet map (k => k -> reader.get(k)) foreach println
 
-  def print(values: Map[String, Any], prefix: String = "") {
+  def print(values: ValueProvider[_], prefix: String = "") {
     def printValue(a: Any) {
       a match {
-        case v: SchemaBasedRdfReader => print(v.targetValues, prefix + "  ")
+        case v: ValueProvider[_] => print(v, prefix + "  ")
         case v => println(prefix + "  " + v)
       }
     }
-    values foreach {
-      case (key, Some(l: List[_])) =>
-        println(prefix + key + ": ")
-        l foreach (v => printValue(v))
-      case (key, Some(v)) =>
-        println(prefix + key + ": ")
-        printValue(v)
-      case _ =>
+
+    values.keySet foreach { key =>
+      (key, values.get(key)) match {
+        case (key, Some(l: List[_])) =>
+          println(prefix + key + ": ")
+          l foreach (v => printValue(v))
+        case (key, Some(v)) =>
+          println(prefix + key + ": ")
+          printValue(v)
+        case _ =>
+      }
     }
   }
 
