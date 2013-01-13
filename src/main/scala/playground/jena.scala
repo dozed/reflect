@@ -130,7 +130,7 @@ object Rdf extends App {
 
   def debug[T](reader: ValueProvider[T]) = reader.keySet map (k => k -> reader.get(k)) foreach println
 
-  val source = io.Source.fromFile(new File("/home/stefan/Code/funk/reflect/src/main/resources/recipes.fl"))
+  val source = io.Source.fromInputStream(getClass.getResourceAsStream("/recipes.fl"))
   val txt = source.mkString
   source.close
 
@@ -138,7 +138,7 @@ object Rdf extends App {
   val recipeSchema = schemas("http://food.42dots.com/Recipe")
 
   val recipes = ModelFactory.createDefaultModel()
-  recipes.read(new FileReader("/home/stefan/Arbeitsfläche/Taaable/recipe-3.xml"), null)
+  recipes.read(getClass.getResourceAsStream("/recipe.xml"), null)
   val recipeResource = recipes.getResource("http://food.42dots.com/dataset/taaable/Apple_twists")
 
   val reader = new SchemaBasedRdfReader(recipeResource, recipes, recipeSchema, schemas.get _)
