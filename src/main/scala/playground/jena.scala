@@ -80,10 +80,12 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
   }
 
   // validation
+  //
+  // for all attributes:
   // - check if all required attributes are there
-  // - validate nested frames
-  // - wrong cardinality -> None
-  // - literal type not compatible -> None
+  // - check if cardinality is applicable (get returns None if not)
+  // - check if literal type compatible (again get returns None if not)
+  // - validate nested frames if required
   def validate: Boolean = {
     def attributeTypeIsOk(a: Attribute): Boolean = {
       get(a.uri) match {

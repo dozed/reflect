@@ -32,7 +32,6 @@
         <taaable:hasIngredientLine>
             <taaable:IngredientLine>
                 <dcterms:description>1 ts Cinnamon</dcterms:description>
-                <taaable:ingredient rdf:resource="http://food.42dots.com/Cinnamon" />
                 <qudt:numericalValue>1</qudt:numericalValue>
                 <qudt:unit rdf:resource="http://food.42dots.com/Tsp" />
             </taaable:IngredientLine>
