@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE rdf:RDF
+        [
+                <!ENTITY rdfns 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+                <!ENTITY rdfsns 'http://www.w3.org/2000/01/rdf-schema#'>
+                <!ENTITY dcns 'http://purl.org/dc/elements/1.1/'>
+                <!ENTITY dctermsns 'http://purl.org/dc/terms/'>
+                <!ENTITY dctypens 'http://purl.org/dc/dcmitype/'>
+                <!ENTITY dcamns 'http://purl.org/dc/dcam/'>
+                <!ENTITY skosns 'http://www.w3.org/2004/02/skos/core#'>
+                <!ENTITY owlns 'http://www.w3.org/2002/07/owl#'>
+                <!ENTITY foafns 'http://xmlns.com/foaf/0.1/'>
+                <!ENTITY swivt 'http://semantic-mediawiki.org/swivt/1.0#'>
+                ]>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"
+         xmlns:dcam="http://purl.org/dc/dcam/" xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:vs="http://www.w3.org/2003/06/sw-vocab-status/ns#" xmlns:wot="http://xmlns.com/wot/0.1/"
+         xmlns:taaable="http://food.42dots.com/" xmlns:qudt="http://data.nasa.gov/qudt/owl/qudt#"
+         xmlns:swivt="http://semantic-mediawiki.org/swivt/1.0#">
+    <taaable:Recipe rdf:about="http://food.42dots.com/dataset/taaable/Test-Recipe-1">
+        <rdfs:label>Test Recipe 1</rdfs:label>
+        <taaable:hasIngredientLine>
+            <taaable:IngredientLine>
+                <dcterms:description>1/2 ts Salt</dcterms:description>
+                <taaable:ingredient rdf:resource="http://food.42dots.com/Salt"/>
+                <qudt:numericalValue>0.5</qudt:numericalValue>
+                <qudt:unit rdf:resource="http://food.42dots.com/Tsp"/>
+            </taaable:IngredientLine>
+        </taaable:hasIngredientLine>
+        <taaable:hasIngredientLine>
+            <taaable:IngredientLine>
+                <dcterms:description>1 ts Cinnamon</dcterms:description>
+                <qudt:numericalValue>1</qudt:numericalValue>
+                <qudt:unit rdf:resource="http://food.42dots.com/Tsp" />
+            </taaable:IngredientLine>
+        </taaable:hasIngredientLine>
+    </taaable:Recipe>
+</rdf:RDF>

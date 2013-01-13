@@ -23,8 +23,8 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
       case x => x
     }
 
-    //
-    val a = for {
+    // check cardinality here
+    for {
       attr <- schema.attributes.filter(_.uri.equals(key)).headOption
       (prop, values) <- sourceValues.filter(_._1.getURI.equals(key)).headOption
     } yield {
@@ -39,7 +39,6 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
           throw new Error("Cardinality violation on %s property %s.".format(data.getURI, prop.getURI))
       }
     }
-    a
   }
 
   def forPrefix(key: String): ValueProvider[Resource] = new SchemaBasedRdfReader(data, model, schema, schemaSource, separated.wrap(key, prefix), separated)
@@ -84,14 +83,23 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
 
 object Rdf extends App {
 
-  def validate[T](p: ValueProvider[T], s: Frame) = {
-    //    val requiredAttrs = s.attributes.filter(_.isRequired).map(_.uri).toSet
-    //    val allAttributesExist = (requiredAttrs -- p.keySet).isEmpty
-
+  def validate[T](p: ValueProvider[T], s: Frame, schemas: String => Option[Frame]): Boolean = {
     def attributeTypeIsOk(a: Attribute): Boolean = {
+
+      // check if all required attributes are there
+      // and validate nested frames
+      // wrong cardinality -> None
+      // literal type not compatible -> None
       p.get(a.uri) match {
-        case Some(v: List[_]) => false
-        case Some(v) => false
+        case Some(v: SchemaBasedRdfReader) =>
+          schemas(a.typesig).map(s => validate(v, s, schemas)).getOrElse(false)
+        case Some(v: List[_]) if !v.isEmpty =>
+          v(0) match {
+            case x: SchemaBasedRdfReader =>
+              schemas(a.typesig).map(s => v.asInstanceOf[List[ValueProvider[_]]].forall(x => validate(x, s, schemas))).getOrElse(false)
+            case _ => true
+          }
+        case Some(v) => true
         case None => !a.isRequired
       }
     }
@@ -106,22 +114,13 @@ object Rdf extends App {
   source.close
 
   val schemas = FLogicParser(txt).map(f => f.uri -> f).toMap
-  val recipeSchema = schemas("http://food.42dots.com/Recipe")
+  val schema = schemas("http://food.42dots.com/Recipe")
 
-  val recipes = ModelFactory.createDefaultModel()
-  recipes.read(getClass.getResourceAsStream("/recipes.xml"), null)
-  val recipeResource = recipes.getResource("http://food.42dots.com/dataset/taaable/Apple_twists")
+  val rdfModel = ModelFactory.createDefaultModel()
+  rdfModel.read(getClass.getResourceAsStream("/recipe-1.xml"), null)
+  val res = rdfModel.getResource("http://food.42dots.com/dataset/taaable/Test-Recipe-1")
 
-  val reader = new SchemaBasedRdfReader(recipeResource, recipes, recipeSchema, schemas.get _)
-
-//  debug(reader)
-  // traverse to ingredientLines
-//    reader.get("http://food.42dots.com/hasIngredientLine").get match {
-//      case readers: List[SchemaBasedRdfReader] =>
-//        readers foreach debug
-//      case _ =>
-//    }
-//
+  val reader = new SchemaBasedRdfReader(res, rdfModel, schema, schemas.get _)
 
   def print(values: Map[String, Any], prefix: String = "") {
     def printValue(a: Any) {
@@ -141,6 +140,7 @@ object Rdf extends App {
     }
   }
 
+  println(validate(reader, schema, schemas.get _))
   print(reader.targetValues)
 
 /*
@@ -192,7 +192,6 @@ http://food.42dots.com/hasIngredientLine:
   http://food.42dots.com/ingredient: http://food.42dots.com/Salt
   http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Tsp
   http://data.nasa.gov/qudt/owl/qudt#numericalValue: 0.5
-
 
 */
 

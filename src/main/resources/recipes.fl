@@ -1,13 +1,13 @@
 
 "http://food.42dots.com/Recipe"[
     "http://www.w3.org/2000/01/rdf-schema#label" (1,1) *=> _string,
-    "http://semantic-mediawiki.org/swivt/1.0#page" (1,1) *=> _iri,
+    "http://semantic-mediawiki.org/swivt/1.0#page" (0,1) *=> _iri,
     "http://food.42dots.com/canBeEatenAs" (0,*) *=> _iri,
     "http://food.42dots.com/hasIngredientLine" (0,*) *=> "http://food.42dots.com/IngredientLine"
 ].
 
 "http://food.42dots.com/IngredientLine"[
-    "http://www.w3.org/2000/01/rdf-schema#label" (1,1) *=> _string,
+    "http://www.w3.org/2000/01/rdf-schema#label" (0,1) *=> _string,
     "http://data.nasa.gov/qudt/owl/qudt#unit" (0,1) *=> _iri,
     "http://data.nasa.gov/qudt/owl/qudt#numericalValue" (0,1) *=> _decimal,
     "http://purl.org/dc/terms/description" (0,1) *=> _string,
