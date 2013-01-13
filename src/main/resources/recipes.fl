@@ -9,7 +9,7 @@
 "http://food.42dots.com/IngredientLine"[
     "http://www.w3.org/2000/01/rdf-schema#label" (1,1) *=> _string,
     "http://data.nasa.gov/qudt/owl/qudt#unit" (0,1) *=> _iri,
-    "http://data.nasa.gov/qudt/owl/qudt#numbericalValue" (0,1) *=> _decimal,
+    "http://data.nasa.gov/qudt/owl/qudt#numericalValue" (0,1) *=> _decimal,
     "http://purl.org/dc/terms/description" (0,1) *=> _string,
     "http://food.42dots.com/ingredient" (1,1) *=> _iri
 ].

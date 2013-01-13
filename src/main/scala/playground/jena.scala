@@ -182,36 +182,46 @@ http://food.42dots.com/hasIngredientLine:
   http://purl.org/dc/terms/description: 4 tb Ice water (up to 5)
   http://food.42dots.com/ingredient: http://food.42dots.com/Ice_cube
   http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Tblsp
-
-  http://purl.org/dc/terms/description: 1 1/2 c Plain flour
-  http://food.42dots.com/ingredient: http://food.42dots.com/All-2Dpurpose_flour
-  http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Cup
-
-  http://purl.org/dc/terms/description: 1 ts Cinnamon
-  http://food.42dots.com/ingredient: http://food.42dots.com/Cinnamon
-  http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Tsp
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 4.0
 
   http://purl.org/dc/terms/description: 3/4 c White sugar
   http://food.42dots.com/ingredient: http://food.42dots.com/Granulated_sugar
   http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Cup
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 0.75
+
+  http://purl.org/dc/terms/description: 1/2. shortening
+  http://food.42dots.com/ingredient: http://food.42dots.com/Shortening
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 0.5
+
+  http://purl.org/dc/terms/description: 1 ts Cinnamon
+  http://food.42dots.com/ingredient: http://food.42dots.com/Cinnamon
+  http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Tsp
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 1.0
+
+  http://purl.org/dc/terms/description: 2 Tart apples
+  http://food.42dots.com/ingredient: http://food.42dots.com/Apple
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 2.0
 
   http://purl.org/dc/terms/description: 1/3 c Melted butter
   http://food.42dots.com/ingredient: http://food.42dots.com/Butter
   http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Cup
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 0.33
 
-  http://purl.org/dc/terms/description: 1/2. shortening
-  http://food.42dots.com/ingredient: http://food.42dots.com/Shortening
-
-  http://purl.org/dc/terms/description: 2 Tart apples
-  http://food.42dots.com/ingredient: http://food.42dots.com/Apple
+  http://purl.org/dc/terms/description: 1 1/2 c Plain flour
+  http://food.42dots.com/ingredient: http://food.42dots.com/All-2Dpurpose_flour
+  http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Cup
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 1.5
 
   http://purl.org/dc/terms/description: 1/2 c Warm water
   http://food.42dots.com/ingredient: http://food.42dots.com/Water
   http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Cup
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 0.5
 
   http://purl.org/dc/terms/description: 1/2 ts Salt
   http://food.42dots.com/ingredient: http://food.42dots.com/Salt
   http://data.nasa.gov/qudt/owl/qudt#unit: http://food.42dots.com/Tsp
+  http://data.nasa.gov/qudt/owl/qudt#numericalValue: 0.5
+
 
 */
 
