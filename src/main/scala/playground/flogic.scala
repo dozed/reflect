@@ -83,6 +83,8 @@ object FLogicParser extends JavaTokenParsers with PackratParsers {
 
   def ident1: Parser[String] = "\"" ~ """[a-zA-Z_/:\#\-\.0-9]+""".r ~ "\"" ^^ { case _ ~ x ~ _ => x }
 
+  override val whiteSpace = """(\s|#.*)+""".r
+
   def apply(input: String): List[Frame] = parseAll(frames, input) match {
     case Success(result, _) => result
     case failure: NoSuccess => scala.sys.error(failure.msg)
