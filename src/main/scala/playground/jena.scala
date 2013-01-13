@@ -5,52 +5,11 @@ import util.control.Exception._
 import java.io.{File, FileReader}
 import com.hp.hpl.jena.rdf.model._
 
-class PlainRdfReader(protected val data: Resource, val model: Model, val prefix: String = "", val separated: Separator = by.Dots) extends ValueProvider[Resource] {
-
-  def read(key: String): Either[Throwable, Option[Any]] = allCatch either {
-    def readValue0(r: RDFNode): AnyRef = r match {
-      case value if value.isResource => new PlainRdfReader(value.asResource, model, key, separated)
-      case value if value.isLiteral => value.asLiteral.getValue
-    }
-    sourceValues.filter(_._1.getURI.equals(key)).map(_._2).headOption.map(l => l map readValue0)
-  }
-
-  def forPrefix(key: String): ValueProvider[Resource] = new PlainRdfReader(data, model, separated.wrap(key, prefix), separated)
-
-  lazy val values: Resource = data
-
-  protected lazy val sourceValues: Map[Property, List[RDFNode]] = data.listProperties.toList.toList.groupBy(_.getPredicate).mapValues(_.map(_.getObject))
-
-  def keySet: Set[String] = sourceValues.keys.map(_.getURI).toSet
-
-  // not that easy operation with rdf since we cant modify the source, maybe add a filter
-  def --(keys: Iterable[String]) = this //new MapValueReader(data -- keys.map(separated.wrap(_, prefix)), prefix, separated)
-
-  def isComplex(key: String) = {
-    val pref = separated.wrap(key, prefix)
-    if (pref != null && pref.trim.nonEmpty) {
-      val prop = model.getProperty(key)
-      if (data.hasProperty(prop)) {
-        separated.stripPrefix(key, prefix).contains(separated.beginning) && key.startsWith(pref + separated.beginning)
-      } else false
-    } else false
-  }
-
-  def contains(key: String): Boolean = false //(data contains separated.wrap(key, prefix)) || isComplex(key)
-
-  private[this] def stripPrefix(d: Map[String, Any]): Map[String, Any] = {
-    if (prefix != null && prefix.trim.nonEmpty) {
-      d collect {
-        case (k, v) if k startsWith (prefix + separated.beginning) => separated.stripPrefix(k, prefix) -> v
-      }
-    } else d
-  }
-
-}
-
 class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val schema: Frame, val schemaSource: String => Option[Frame], val prefix: String = "", val separated: Separator = by.Dots) extends ValueProvider[Resource] {
 
   def read(key: String): Either[Throwable, Option[Any]] = allCatch either {
+
+    // type-cast value, use typesig information
     def readValue0(value: RDFNode, attr: Attribute): Any = (value, attr.typesig) match {
       case (value, "_string") if value.isLiteral => value.asLiteral.getString
       case (value, "_decimal") if value.isLiteral => value.asLiteral.getDouble
@@ -64,7 +23,8 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
       case x => x
     }
 
-    for {
+    //
+    val a = for {
       attr <- schema.attributes.filter(_.uri.equals(key)).headOption
       (prop, values) <- sourceValues.filter(_._1.getURI.equals(key)).headOption
     } yield {
@@ -79,6 +39,7 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
           throw new Error("Cardinality violation on %s property %s.".format(data.getURI, prop.getURI))
       }
     }
+    a
   }
 
   def forPrefix(key: String): ValueProvider[Resource] = new SchemaBasedRdfReader(data, model, schema, schemaSource, separated.wrap(key, prefix), separated)
@@ -123,9 +84,21 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
 
 object Rdf extends App {
 
-  def validate[T](v: ValueProvider[T], s: Frame) = {
-    val reqAttrs = s.attributes.filter(_.isRequired).map(_.uri).toSet
-    (reqAttrs -- v.keySet).isEmpty
+  def validate[T](p: ValueProvider[T], s: Frame) = {
+    //    val requiredAttrs = s.attributes.filter(_.isRequired).map(_.uri).toSet
+    //    val allAttributesExist = (requiredAttrs -- p.keySet).isEmpty
+
+    def attributeTypeIsOk(a: Attribute): Boolean = {
+      p.get(a.uri) match {
+        case Some(v: List[_]) =>
+        case Some(v) =>
+
+        case None =>
+          !a.isRequired
+      }
+    }
+
+    s.attributes.forall(attributeTypeIsOk)
   }
 
   def debug[T](reader: ValueProvider[T]) = reader.keySet map (k => k -> reader.get(k)) foreach println
