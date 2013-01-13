@@ -2,11 +2,11 @@ package playground
 
 import scala.collection.JavaConversions._
 import util.control.Exception._
-import java.io.{File, FileReader}
 import com.hp.hpl.jena.rdf.model._
 
 class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val schema: Frame, val schemaSource: String => Option[Frame], val prefix: String = "", val separated: Separator = by.Dots) extends ValueProvider[Resource] {
 
+  // reads a property value from a Resource and does early local validation (cardinality, literal types)
   def read(key: String): Either[Throwable, Option[Any]] = allCatch either {
 
     // type-cast value, use typesig information
@@ -20,7 +20,7 @@ class SchemaBasedRdfReader(protected val data: Resource, val model: Model, val s
         schemaSource(uri).map { s =>
           new SchemaBasedRdfReader(value.asResource, model, s, schemaSource, key, separated)
         }.get
-      case x => x
+      case _ => throw new Error("Could not determine type.")
     }
 
     // check cardinality here
