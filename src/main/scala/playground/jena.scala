@@ -90,11 +90,9 @@ object Rdf extends App {
 
     def attributeTypeIsOk(a: Attribute): Boolean = {
       p.get(a.uri) match {
-        case Some(v: List[_]) =>
-        case Some(v) =>
-
-        case None =>
-          !a.isRequired
+        case Some(v: List[_]) => false
+        case Some(v) => false
+        case None => !a.isRequired
       }
     }
 
@@ -111,7 +109,7 @@ object Rdf extends App {
   val recipeSchema = schemas("http://food.42dots.com/Recipe")
 
   val recipes = ModelFactory.createDefaultModel()
-  recipes.read(getClass.getResourceAsStream("/recipe.xml"), null)
+  recipes.read(getClass.getResourceAsStream("/recipes.xml"), null)
   val recipeResource = recipes.getResource("http://food.42dots.com/dataset/taaable/Apple_twists")
 
   val reader = new SchemaBasedRdfReader(recipeResource, recipes, recipeSchema, schemas.get _)
