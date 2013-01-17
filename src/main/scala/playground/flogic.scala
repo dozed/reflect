@@ -4,22 +4,25 @@ import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.combinator.JavaTokenParsers
 
 trait Cardinality
-
-object Required extends Cardinality {
-  override def toString = "Required"
-}
-
-object Optional extends Cardinality {
-  override def toString = "Optional"
-}
-
+object Required extends Cardinality
+object Optional extends Cardinality
 case class Qualified(min: Int, max: Int) extends Cardinality
-
 case class MinQualified(min: Int) extends Cardinality
+
+// similarities between two frames
+trait Similarity
+case class Equal(ignoreCase: Boolean) extends Similarity
+case class Interval(size: Int) extends Similarity
+object EqualConcept extends Similarity
+object Levenshtein extends Similarity
+
+trait SimilarityProvider {
+  def sim(uri: String): Option[Similarity]
+}
 
 case class Frame(uri: String, superClasses: List[String], classes: List[String], attributes: List[Attribute])
 
-case class Attribute(uri: String, cardinality: Cardinality = Required, typesig: String) {
+case class Attribute(uri: String, cardinality: Cardinality = Required, typesig: String, sim: Option[(Similarity, Double)]) {
   def isRequired = cardinality match {
     case Required => true
     case Qualified(0, _) => false
@@ -58,9 +61,20 @@ object FLogicParser extends JavaTokenParsers with PackratParsers {
     "." ^^ { case _ => List() }
 
   def attr: Parser[Attribute] =
-    ident1 ~ cardinality ~ doubleArrow ~ typesig ^^ {
-      case id ~ c ~ _ ~ t => Attribute(id, c, t)
+    ident1 ~ cardinality ~ doubleArrow ~ typesig ^^ { case id ~ c ~ _ ~ t =>
+      Attribute(id, c, t, None) } |
+    ident1 ~ cardinality ~ doubleArrow ~ "[" ~
+      "type" ~ arrow ~ typesig ~ "," ~
+      "sim" ~ arrow ~ similarity ~ "," ~
+      "weight" ~ arrow ~ decimalNumber ~
+      "]" ^^ {
+      case id ~ c ~ _ ~ _ ~ _ ~ _ ~ t ~ _ ~ _ ~ _ ~ sim ~ _ ~ _ ~ _ ~ weight ~ _=>
+        Attribute(id, c, t, Some((sim, weight.toDouble)))
     }
+
+  def similarity: Parser[Similarity] =
+    "EqualConcept" ^^ { case _ => EqualConcept } |
+    "Levenshtein" ^^ { case _ => Levenshtein }
 
   def arrow: Parser[Any] = "->" | "*->"
 
@@ -89,4 +103,17 @@ object FLogicParser extends JavaTokenParsers with PackratParsers {
     case Success(result, _) => result
     case failure: NoSuccess => scala.sys.error(failure.msg)
   }
+}
+
+object FLogic extends App {
+
+  val source = io.Source.fromInputStream(getClass.getResourceAsStream("/recipes.fl"))
+  val txt = source.mkString
+  source.close
+
+  val schemas = FLogicParser(txt).map(f => f.uri -> f).toMap
+  val schema = schemas(Uris.recipe)
+
+
+
 }

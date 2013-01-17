@@ -135,7 +135,7 @@ object Rdf extends App {
     }
   }
 
-  val source = io.Source.fromInputStream(getClass.getResourceAsStream("/recipes.fl"))
+  val source = io.Source.fromInputStream(getClass.getResourceAsStream("/recipes-sim.fl"))
   val txt = source.mkString
   source.close
 
@@ -150,6 +150,58 @@ object Rdf extends App {
     val reader = new SchemaBasedRdfReader(res, rdfModel, schema, schemas.get _)
     reader.validate
   } foreach println
+
+
+  val x = rdfModel.getResource("http://food.42dots.com/dataset/taaable/Feta-2Dtomato_toppers")
+  val y = rdfModel.getResource("http://food.42dots.com/dataset/taaable/Herbs_and_tomato_in_pasta")
+
+  val r1 = new SchemaBasedRdfReader(x, rdfModel, schema, schemas.get _)
+  val r2 = new SchemaBasedRdfReader(y, rdfModel, schema, schemas.get _)
+
+
+  def sim(x: SchemaBasedRdfReader, y: SchemaBasedRdfReader) = {
+
+    // http://oldfashionedsoftware.com/2009/11/19/string-distance-and-refactoring-in-scala/
+    def stringDistance(s1: String, s2: String): Double = {
+      val memo = scala.collection.mutable.Map[(List[Char],List[Char]),Int]()
+      def min(a:Int, b:Int, c:Int) = Math.min( Math.min( a, b ), c)
+      def sd(s1: List[Char], s2: List[Char]): Int = {
+        if (memo.contains((s1,s2)) == false)
+          memo((s1,s2)) = (s1, s2) match {
+            case (_, Nil) => s1.length
+            case (Nil, _) => s2.length
+            case (c1::t1, c2::t2)  => min( sd(t1,s2) + 1, sd(s1,t2) + 1,
+              sd(t1,t2) + (if (c1==c2) 0 else 1) )
+          }
+        memo((s1,s2))
+      }
+
+      val m = math.max(s1.size, s2.size)
+      if (m == 0) 1.0 else sd(s1.toList, s2.toList) / m.toDouble
+    }
+
+    def sim0(x: Any, y: Any, sim: Similarity): Double = {
+      println("%s - %s - %s".format(x, y, sim))
+      (x, y, sim) match {
+        case (s1: String, s2: String, EqualConcept) => if (s1 != null && s1.equals(s2)) 1 else 0
+        case (s1: String, s2: String, Levenshtein) => stringDistance(s1, s2)
+        case _ => 0
+      }
+    }
+
+    require(x.schema == y.schema)
+    val schema = x.schema
+
+    schema.attributes.filter(_.sim.isDefined).map { a =>
+      val (sim, weight) = a.sim.get
+      (x.get(a.uri), y.get(a.uri)) match {
+        case (Some(v1), Some(v2)) => sim0(v1, v2, sim) * weight
+        case _ => 0
+      }
+    }.foldLeft(0.0)(_ + _)
+  }
+
+  println(sim(r1, r2))
 
 /*
 

@@ -4,6 +4,8 @@ name := "reflect"
 
 organization := "com.github.casualjim"
 
+net.virtualvoid.sbt.graph.Plugin.graphSettings
+
 libraryDependencies += "org.specs2" %% "specs2" % "1.13" % "test"
 
 libraryDependencies +=  "org.apache.jena" % "jena-core" % "2.7.4"

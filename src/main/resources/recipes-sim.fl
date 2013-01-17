@@ -1,0 +1,32 @@
+
+# comment
+# namespace("food", "http://food.42dots.com/")
+
+"http://food.42dots.com/Recipe"[
+    "http://www.w3.org/2000/01/rdf-schema#label" (1,1) => [
+        type -> _string,
+        sim -> Levenshtein,
+        weight -> 0.5
+    ],
+    "http://semantic-mediawiki.org/swivt/1.0#page" (0,1) => _iri,
+    "http://food.42dots.com/canBeEatenAs" (0,*) => [
+        type -> _iri,
+        sim -> EqualConcept,
+        weight -> 0.5
+    ],
+    "http://food.42dots.com/hasIngredientLine" (0,*) => "http://food.42dots.com/IngredientLine"
+].
+
+"http://food.42dots.com/IngredientLine"[
+    "http://www.w3.org/2000/01/rdf-schema#label" (0,1) => _string,
+    "http://data.nasa.gov/qudt/owl/qudt#unit" (0,1) => _iri,
+    "http://data.nasa.gov/qudt/owl/qudt#numericalValue" (0,1) => _decimal,
+    "http://purl.org/dc/terms/description" (0,1) => _string,
+    "http://food.42dots.com/ingredient" (1,1) => [
+        type -> _iri,
+        sim -> EqualConcept,
+        weight -> 1.0
+    ]
+].
+
+
